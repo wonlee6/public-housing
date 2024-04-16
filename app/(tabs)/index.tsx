@@ -23,7 +23,6 @@ export default function TabOneScreen() {
   const region = useRegion((state) => state.region)
   const handleRegion = useRegion((state) => state.handleRegion)
   const handleMapRatio = useRegion((state) => state.handleMapRatio)
-  useEffect(() => console.log(region), [region])
 
   const filteredPublicHousingData = useMemo(() => {
     if (publicHousingData && publicHousingData[1] && publicHousingData[1].dsList) {
@@ -72,7 +71,11 @@ export default function TabOneScreen() {
       provider='google'
       style={styles.map}
       region={region}
-      onRegionChangeComplete={(region) => handleRegion(region)}
+      onRegionChangeComplete={(region, details) => {
+        if (details.isGesture) {
+          handleRegion(region)
+        }
+      }}
     >
       {filteredPublicHousingData.map((item) => (
         <MarkerComponent

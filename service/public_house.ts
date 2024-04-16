@@ -1,4 +1,5 @@
 import { PublicHousingDetailModel, PublicHousingModel } from '@/model/public-housing'
+import { LatLng } from 'react-native-maps'
 
 const serviceKey = encodeURIComponent(process.env.EXPO_PUBLIC_API_KEY!)
 export async function fetchNoticeInfo(): Promise<PublicHousingModel> {
@@ -34,7 +35,9 @@ type RequestNotiInfo = {
   AIS_TP_CD?: string
 }
 
-export async function fetchNoticeInfoDetail(request: RequestNotiInfo): Promise<PublicHousingDetailModel> {
+export async function fetchNoticeInfoDetail(
+  request: RequestNotiInfo
+): Promise<PublicHousingDetailModel> {
   const 분양임대공고별상세정보조회 =
     'http://apis.data.go.kr/B552555/lhLeaseNoticeDtlInfo1/getLeaseNoticeDtlInfo1'
   const 공급정보구분코드 = `${encodeURIComponent('SPL_INF_TP_CD')}=${encodeURIComponent(
@@ -60,4 +63,16 @@ export async function fetchNoticeInfoDetail(request: RequestNotiInfo): Promise<P
 
   const response = await fetch(notiInfoUrl)
   return await response.json()
+}
+
+export async function getCoordinateByAddress(address: string): Promise<LatLng> {
+  const response = await fetch(
+    `https://maps.googleapis.com/maps/api/geocode/json?address=${address}&region=kr&key=${process.env.EXPO_PUBLIC_GOOGLE_MAP_API_KEY}`
+  )
+  const data = await response.json()
+  const { lat, lng } = data.results[0].geometry.location
+  return {
+    latitude: lat,
+    longitude: lng
+  }
 }

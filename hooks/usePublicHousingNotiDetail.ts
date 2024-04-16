@@ -3,7 +3,13 @@ import { UseQueryResult, useQueries } from '@tanstack/react-query'
 import { PublicHousing, PublicHousingDetailModel } from '@/model/public-housing'
 import { fetchNoticeInfoDetail } from '@/service/public_house'
 
-const usePublicHousingNotiDetail = (data: PublicHousing[]) => {
+const usePublicHousingNotiDetail = (data: PublicHousing[] | undefined) => {
+  if (!data)
+    return {
+      houseDetailData: [],
+      pending: true
+    }
+
   const handleCombine = useCallback(
     (result: UseQueryResult<PublicHousingDetailModel, Error>[]) => {
       return {

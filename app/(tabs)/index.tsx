@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { Dimensions, StyleSheet } from 'react-native'
+import { StyleSheet } from 'react-native'
 import MapView from 'react-native-maps'
 
 import MarkerComponent from '@/components/ui/marker'
@@ -8,8 +8,9 @@ import { PublicHousingModel } from '@/model/public-housing'
 import { convertCityName, getRatioByProvince } from '@/lib/utils'
 import { initRegionLocation } from '@/data/inital-region'
 import useRegion from '@/store/useRegion'
+import usePublicHousingNotiDetail from '@/hooks/usePublicHousingNotiDetail'
 
-type convertCount = {
+type ConvertCount = {
   count: number
   city: string
 }
@@ -18,16 +19,42 @@ export default function TabOneScreen() {
   const [publicHousingData, setPublicHousingData] =
     useState<PublicHousingModel>(mock_up_public_housing)
 
+  const { houseDetailData, pending } = usePublicHousingNotiDetail(
+    publicHousingData[1].dsList
+  )
+
   // const { data, error, isLoading, isPending } = usePublicHousingNotice()
 
   const region = useRegion((state) => state.region)
   const handleRegion = useRegion((state) => state.handleRegion)
   const handleMapRatio = useRegion((state) => state.handleMapRatio)
 
+  const handleSelectProvince = useCallback(
+    (province: string, lat: number, lng: number) => {
+      const ratio = getRatioByProvince(province)
+      handleMapRatio(ratio, lat, lng)
+    },
+    []
+  )
+
+  const [isRatio, setIsRatio] = useState(false)
+  useEffect(() => {
+    if (region.latitudeDelta < 2) {
+      setIsRatio(true)
+      return
+    }
+    setIsRatio(false)
+  }, [region])
+
   const filteredPublicHousingData = useMemo(() => {
-    if (publicHousingData && publicHousingData[1] && publicHousingData[1].dsList) {
+    if (
+      !isRatio &&
+      publicHousingData &&
+      publicHousingData[1] &&
+      publicHousingData[1].dsList
+    ) {
       const convertHomeData = publicHousingData[1].dsList.reduce(
-        (acc: convertCount[], cur) => {
+        (acc: ConvertCount[], cur) => {
           const curCity = convertCityName(cur.CNP_CD_NM)
           const findItem = acc.find((v) => v.city === curCity)
           if (findItem) {
@@ -53,18 +80,13 @@ export default function TabOneScreen() {
         }
       })
     }
+
+    if (isRatio && houseDetailData && Array.isArray(houseDetailData)) {
+      return houseDetailData
+    }
+
     return []
-  }, [publicHousingData])
-
-  const handleSelectProvince = useCallback(
-    (province: string, lat: number, lng: number) => {
-      const ratio = getRatioByProvince(province)
-      handleMapRatio(ratio, lat, lng)
-    },
-    []
-  )
-
-  // useEffect(() => console.log('result', data?.houseDetailData[0]?.[1].dsCtrtPlc), [data])
+  }, [publicHousingData, isRatio, houseDetailData])
 
   return (
     <MapView
@@ -77,12 +99,9 @@ export default function TabOneScreen() {
         }
       }}
     >
-      {filteredPublicHousingData.map((item) => (
-        <MarkerComponent
-          key={item.city}
-          {...item}
-          onSelectProvince={handleSelectProvince}
-        />
+      {filteredPublicHousingData.map((item, index) => (
+        // <MarkerComponent key={index} onSelectProvince={handleSelectProvince} {...item} />
+        <></>
       ))}
     </MapView>
   )

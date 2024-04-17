@@ -51,6 +51,16 @@ export type PublicHousing = {
  *  @field dsEtcInfo - 기타정보
  *
  */
+
+/**
+ *
+ *  @field SPL_INF_TP_CD
+ *  @description 390 - 신혼희망타운, 050 - 분양주택, 051 - 분양주택 - 분양전환, 060 - 공공임대, 061 - 임대주택 - 50년공공임대, 062 - 국민임대, 063 - 행복주택
+ *  130 - 청년신혼부부 매입임대리츠, 131 - 청년매입임대, 132 - 신혼부부매입임대, 133 - 집주인 리모델링, 134 - 기숙사형 매입임대, 135 - 다가구 매입임대, 136 - 장기미임대 매입임대
+ *  137 - 청년전세임대, 138 - 신혼부부전세임대, 140 - 다자녀전세임대
+ *  1325 신혼부부매입임대수시, 143 - 전세형매입임대, 144 - 공공전세주택
+ *
+ */
 export type PublicHousingDetailModel = (
   | {
       dsSch: {
@@ -116,18 +126,19 @@ export type PublicHousingDetailModel = (
         CMN_AHFL_NM: string
       }[]
       dsSbd: {
-        LCT_ARA_DTL_ADR: string
+        LCT_ARA_DTL_ADR: string // 단지 상세 주소
         BZDT_NM: string
         EDC_FCL_CTS: string
         MIN_MAX_RSDN_DDO_AR: string
         SUM_TOT_HSH_CNT: string
         TFFC_FCL_CTS: string
-        LCT_ARA_ADR: string
+        LCT_ARA_ADR: string // 단지 주소
         CVN_FCL_CTS: string
         HTN_FMLA_DS_CD_NM: string
         IDT_FCL_CTS: string
         SPL_INF_GUD_FCTS: string
         MVIN_XPC_YM: string
+        LCC_NT_NM?: string // 단지 이름
       }[]
       dsSbdAhfl: {
         BZDT_NM: string

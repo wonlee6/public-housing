@@ -1,10 +1,9 @@
 import { PublicHousingDetailModel, PublicHousingModel } from '@/model/public-housing'
-import { LatLng } from 'react-native-maps'
 
 const serviceKey = encodeURIComponent(process.env.EXPO_PUBLIC_API_KEY!)
 export async function fetchNoticeInfo(): Promise<PublicHousingModel> {
   const address = 'http://apis.data.go.kr/B552555/lhLeaseNoticeInfo1/lhLeaseNoticeInfo1'
-  const pageSize = `${encodeURIComponent('PG_SZ')}=${encodeURIComponent('10')}`
+  const pageSize = `${encodeURIComponent('PG_SZ')}=${encodeURIComponent('50')}`
   const page = `${encodeURIComponent('PAGE')}=${encodeURIComponent('1')}`
   const 공고중 = `${encodeURIComponent('PAN_SS')}=${encodeURIComponent('공고중')}`
   const startDate = `${encodeURIComponent('PAN_ST_DT')}=${encodeURIComponent('20240401')}`
@@ -65,14 +64,14 @@ export async function fetchNoticeInfoDetail(
   return await response.json()
 }
 
-export async function getCoordinateByAddress(address: string): Promise<LatLng> {
+export async function getCoordinateByAddress(address: string) {
   const response = await fetch(
     `https://maps.googleapis.com/maps/api/geocode/json?address=${address}&region=kr&key=${process.env.EXPO_PUBLIC_GOOGLE_MAP_API_KEY}`
   )
-  const data = await response.json()
-  const { lat, lng } = data.results[0].geometry.location
-  return {
-    latitude: lat,
-    longitude: lng
-  }
+  return await response.json()
+  // const { lat, lng } = data.results[0].geometry.location
+  // return {
+  //   latitude: lat,
+  //   longitude: lng
+  // }
 }

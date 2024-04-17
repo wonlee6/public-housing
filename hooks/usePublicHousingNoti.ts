@@ -1,6 +1,5 @@
 import { fetchNoticeInfo } from '@/service/public_house'
 import { useQuery } from '@tanstack/react-query'
-import usePublicHousingNotiDetail from './usePublicHousingNotiDetail'
 
 const usePublicHousingNotice = () => {
   return useQuery({

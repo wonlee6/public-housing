@@ -52,7 +52,7 @@ export function getRatioByProvince(province: string) {
     case '충북':
       return 0.24
     case '경기':
-      return 0.2
+      return 0.25
     case '광주':
       return 0.06
     case '전남':

@@ -1,3 +1,5 @@
+import { LatLng } from 'react-native-maps'
+
 export function convertCityName(CNP_CD_NM: string): string {
   switch (CNP_CD_NM) {
     case '서울특별시':
@@ -37,41 +39,121 @@ export function convertCityName(CNP_CD_NM: string): string {
   }
 }
 
-export function getRatioByProvince(province: string) {
+export function getMapInfoByProvince(province: string): LatLng & { ratio: number } {
   switch (province) {
     case '서울':
-      return 0.09
+      return {
+        latitude: 37.5642135,
+        longitude: 127.0016985,
+        ratio: 0.35
+      }
+    case '인천':
+      return {
+        latitude: 37.45639,
+        longitude: 126.70528,
+        ratio: 0.2
+      }
     case '강원':
-      return 0.4
+      return {
+        latitude: 37.5642135,
+        longitude: 128.2716985,
+        ratio: 1.3
+      }
     case '대전':
-      return 0.035
+      return {
+        latitude: 36.34174114321101,
+        longitude: 127.40736600783121,
+        ratio: 0.27
+      }
     case '충남':
-      return 0.3
+      return {
+        latitude: 36.667882031144636,
+        longitude: 126.6538360304482,
+        ratio: 1
+      }
     case '세종':
-      return 0.025
+      return {
+        latitude: 36.4875,
+        longitude: 127.28167,
+        ratio: 0.2
+      }
     case '충북':
-      return 0.24
+      return {
+        latitude: 36.867923322966554,
+        longitude: 127.8666107930661,
+        ratio: 0.8
+      }
     case '경기':
-      return 0.25
-    case '광주':
-      return 0.06
+      return {
+        latitude: 37.5642135,
+        longitude: 127.0016985,
+        ratio: 0.5
+      }
     case '전남':
-      return 0.5
+      return {
+        latitude: 34.87472824025082,
+        longitude: 126.89897919603526,
+        ratio: 1.4
+      }
     case '전북':
-      return 0.3
+      return {
+        latitude: 35.829042037259754,
+        longitude: 127.12378141310465,
+        ratio: 1
+      }
     case '부산':
-      return 0.09
+      return {
+        latitude: 35.17944,
+        longitude: 129.07556,
+        ratio: 0.4
+      }
     case '경남':
-      return 0.4
+      return {
+        latitude: 35.29221113278547,
+        longitude: 128.30333757310564,
+        ratio: 1.5
+      }
     case '울산':
-      return 0.2
-    case '제주':
-      return 0.3
+      return {
+        latitude: 35.53889,
+        longitude: 129.31667,
+        ratio: 0.4
+      }
+    case '제주도':
+      return {
+        latitude: 33.39067201222793,
+        longitude: 126.55830400820281,
+        ratio: 0.7
+      }
     case '대구':
-      return 0.07
+      return {
+        latitude: 35.87222,
+        longitude: 128.6025,
+        ratio: 0.4
+      }
+    case '대전':
+      return {
+        latitude: 36.35111,
+        longitude: 127.385,
+        ratio: 0.4
+      }
     case '경북':
-      return 0.4
+      return {
+        latitude: 36.116736544822416,
+        longitude: 128.90167264519448,
+        ratio: 1.4
+      }
+    case '광주':
+      return {
+        latitude: 35.154469239959916,
+        longitude: 126.84363683896488,
+        ratio: 0.3
+      }
     default:
-      return 1
+      return {
+        latitude: 37.5642135,
+        longitude: 127.0016985,
+        ratio: 0.4
+      }
   }
 }

@@ -31,32 +31,30 @@ export default function DetailMarker({ publicHousingData }: DetailMarker) {
   )
 }
 
-const MarkerConfig = React.memo(
-  (props: PublicHousingDetailModel & { index?: number }) => {
-    const houseType = (props as any)[0].dsSch[0].SPL_INF_TP_CD
-    const isInvalidType = invalidType(houseType)
+function MarkerConfig(props: PublicHousingDetailModel & { index?: number }) {
+  const houseType = (props as any)[0].dsSch[0].SPL_INF_TP_CD
+  const isInvalidType = invalidType(houseType)
 
-    const 단지정보 = useMemo(() => {
-      return props[1]?.dsSbd
-    }, [props])
+  const 단지정보 = useMemo(() => {
+    return props[1]?.dsSbd
+  }, [props])
 
-    if (isInvalidType) {
-      return null
-    }
-
-    if (!단지정보) {
-      return null
-    }
-
-    return (
-      <>
-        {단지정보.map((item, index) => (
-          <MarkerComponent key={index} {...item} houseType={houseType} />
-        ))}
-      </>
-    )
+  if (isInvalidType) {
+    return null
   }
-)
+
+  if (!단지정보) {
+    return null
+  }
+
+  return (
+    <>
+      {단지정보.map((item, index) => (
+        <MarkerComponent key={index} {...item} houseType={houseType} />
+      ))}
+    </>
+  )
+}
 
 type Test = {
   houseType: string

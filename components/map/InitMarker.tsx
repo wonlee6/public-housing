@@ -1,7 +1,7 @@
 import React, { useCallback } from 'react'
 import { Marker } from 'react-native-maps'
 import { Text, View } from 'react-native'
-import { getRatioByProvince } from '@/lib/utils'
+import { getMapInfoByProvince } from '@/lib/utils'
 import useRegion from '@/store/useRegion'
 
 type MarkerModel = {
@@ -18,13 +18,10 @@ type InitMarker = {
 export default function InitMarker({ markerList }: InitMarker) {
   const handleMapRatio = useRegion((state) => state.handleMapRatio)
 
-  const handleSelectProvince = useCallback(
-    (province: string, lat: number, lng: number) => {
-      const ratio = getRatioByProvince(province)
-      handleMapRatio(ratio, lat, lng)
-    },
-    []
-  )
+  const handleSelectProvince = useCallback((province: string) => {
+    const provinceInfo = getMapInfoByProvince(province)
+    handleMapRatio(provinceInfo)
+  }, [])
 
   return (
     <>
@@ -47,7 +44,7 @@ const MarkerComponent = React.memo(
     lng,
     onSelectProvince
   }: MarkerModel & {
-    onSelectProvince: (province: string, lat: number, lng: number) => void
+    onSelectProvince: (province: string) => void
   }) => {
     return (
       <Marker
@@ -55,7 +52,7 @@ const MarkerComponent = React.memo(
           latitude: lat,
           longitude: lng
         }}
-        onPress={() => onSelectProvince(city, lat, lng)}
+        onPress={() => onSelectProvince(city)}
       >
         <View className='w-[60] shadow-md rounded-sm'>
           <View className='bg-indigo-900 w-full rounded-sm'>

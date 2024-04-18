@@ -15,14 +15,7 @@ type ConvertCount = {
 }
 
 export default function TabOneScreen() {
-  // const [publicHousingData, setPublicHousingData] =
-  //   useState<PublicHousingModel>(mock_up_public_housing)
-
   const { data, error, isLoading } = usePublicHousingNotice()
-
-  if (error) {
-    return null
-  }
 
   const handleRegion = useRegion((state) => state.handleRegion)
   const region = useRegion((state) => state.region)
@@ -65,6 +58,10 @@ export default function TabOneScreen() {
     }
     setIsRatio(false)
   }, [region])
+
+  if (error) {
+    return null
+  }
 
   return (
     <MapView

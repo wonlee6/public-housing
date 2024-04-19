@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { StyleSheet } from 'react-native'
+import { ActivityIndicator, StyleSheet, TouchableOpacity } from 'react-native'
 import MapView from 'react-native-maps'
 
 import { convertCityName } from '@/lib/utils'
@@ -8,6 +8,9 @@ import useRegion from '@/store/useRegion'
 import InitMarker from '@/components/map/InitMarker'
 import DetailMarker from '@/components/map/DetailMarker'
 import usePublicHousingNotice from '@/hooks/usePublicHousingNoti'
+import useSelectHouse from '@/store/useSelectHouse'
+import { SafeAreaView } from 'react-native-safe-area-context'
+import { Text, View } from '@/components/Themed'
 
 type ConvertCount = {
   count: number
@@ -19,6 +22,8 @@ export default function TabOneScreen() {
 
   const handleRegion = useRegion((state) => state.handleRegion)
   const region = useRegion((state) => state.region)
+
+  const selectedHouse = useSelectHouse((state) => state.selectedHouse)
 
   const [isRatio, setIsRatio] = useState(false)
 
@@ -63,28 +68,55 @@ export default function TabOneScreen() {
     return null
   }
 
+  useEffect(() => console.log(selectedHouse), [selectedHouse])
+
   return (
-    <MapView
-      provider='google'
-      style={styles.map}
-      region={region}
-      onRegionChangeComplete={(region, details) => {
-        if (details.isGesture) {
-          handleRegion(region)
-        }
-      }}
-    >
-      {!isRatio || isLoading ? (
-        <InitMarker markerList={filteredPublicHousingData} />
-      ) : (
-        <DetailMarker publicHousingData={data} />
-      )}
-    </MapView>
+    <SafeAreaView className='h-full flex-col' edges={{ bottom: 'off', top: 'additive' }}>
+      {isLoading ? <ActivityIndicator size={'large'} /> : null}
+      <MapView
+        provider='google'
+        // style={styles.map}
+        className={selectedHouse ? 'h-3/4' : 'h-full'}
+        region={region}
+        onRegionChangeComplete={(region, details) => {
+          if (details.isGesture) {
+            handleRegion(region)
+          }
+        }}
+      >
+        {!isRatio || isLoading ? (
+          <InitMarker markerList={filteredPublicHousingData} />
+        ) : (
+          <DetailMarker publicHousingData={data} />
+        )}
+      </MapView>
+      {selectedHouse ? (
+        <View className='h-1/4 p-4 items-center justify-center border border-red-500'>
+          <View className='flex-row items-center justify-evenly w-3/4'>
+            <TouchableOpacity
+              className='p-4 bg-primary rounded-md shadow-md'
+              onPress={() => {}}
+            >
+              <Text className='text-white font-bold'>모집 공고</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              className='p-4 bg-secondary rounded-md shadow-md'
+              onPress={() => {}}
+            >
+              <Text className='text-white font-bold'>청약 센터</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      ) : null}
+    </SafeAreaView>
   )
 }
 
 const styles = StyleSheet.create({
   map: {
     ...StyleSheet.absoluteFillObject
+  },
+  button: {
+    backgroundColor: '#006FEE'
   }
 })

@@ -1,9 +1,10 @@
-import React, { useMemo } from 'react'
+import React, { useCallback, useMemo } from 'react'
 import { Text, View } from 'react-native'
 import { Marker } from 'react-native-maps'
 import { PublicHousingDetailModel, PublicHousingModel } from '@/model/public-housing'
 import useCoordinateByAddress from '@/hooks/useCoordinateByAddress'
 import usePublicHousingNotiDetail from '@/hooks/usePublicHousingNotiDetail'
+import useSelectHouse from '@/store/useSelectHouse'
 
 type DetailMarker = {
   publicHousingData: PublicHousingModel | undefined
@@ -32,12 +33,18 @@ export default function DetailMarker({ publicHousingData }: DetailMarker) {
 }
 
 function MarkerConfig(props: PublicHousingDetailModel & { index?: number }) {
+  const handleSelectHouse = useSelectHouse((state) => state.handleSelectHouse)
+
   const houseType = (props as any)[0].dsSch[0].SPL_INF_TP_CD
   const isInvalidType = invalidType(houseType)
 
   const 단지정보 = useMemo(() => {
     return props[1]?.dsSbd
   }, [props])
+
+  const handleSelectMarker = useCallback(() => {
+    handleSelectHouse(props)
+  }, [단지정보])
 
   if (isInvalidType) {
     return null
@@ -50,13 +57,19 @@ function MarkerConfig(props: PublicHousingDetailModel & { index?: number }) {
   return (
     <>
       {단지정보.map((item, index) => (
-        <MarkerComponent key={index} {...item} houseType={houseType} />
+        <MarkerComponent
+          key={index}
+          {...item}
+          houseType={houseType}
+          onSelectMarker={handleSelectMarker}
+        />
       ))}
     </>
   )
 }
 
-type Test = {
+type DetailHouse = {
+  onSelectMarker: () => void
   houseType: string
   LCT_ARA_DTL_ADR: string // 단지 상세 주소
   BZDT_NM?: string
@@ -75,7 +88,7 @@ type Test = {
   LGDN_DTL_ADR?: string
 }
 
-const MarkerComponent = React.memo((props: Test) => {
+const MarkerComponent = React.memo((props: DetailHouse) => {
   let address = ''
   if (props.houseType === '061' || props.houseType === '051') {
     if (props.LGDN_ADR && props.LGDN_DTL_ADR) {
@@ -101,7 +114,7 @@ const MarkerComponent = React.memo((props: Test) => {
   }
 
   return (
-    <Marker coordinate={data}>
+    <Marker coordinate={data} onPress={() => props.onSelectMarker()}>
       <View className='max-w-[100] shadow-md rounded-sm'>
         <View className='bg-indigo-900 w-full rounded-sm'>
           <Text className='text-yellow-50 text-center p-1'>

@@ -71,12 +71,12 @@ export default function TabOneScreen() {
   useEffect(() => console.log(selectedHouse), [selectedHouse])
 
   return (
-    <SafeAreaView className='h-full flex-col' edges={{ bottom: 'off', top: 'additive' }}>
+    <SafeAreaView className='h-full flex-col' edges={{ bottom: 'off' }}>
       {isLoading ? <ActivityIndicator size={'large'} /> : null}
       <MapView
         provider='google'
         // style={styles.map}
-        className={selectedHouse ? 'h-3/4' : 'h-full'}
+        className={selectedHouse ? 'h-5/6' : 'h-full'}
         region={region}
         onRegionChangeComplete={(region, details) => {
           if (details.isGesture) {
@@ -91,8 +91,17 @@ export default function TabOneScreen() {
         )}
       </MapView>
       {selectedHouse ? (
-        <View className='h-1/4 p-4 items-center justify-center border border-red-500'>
-          <View className='flex-row items-center justify-evenly w-3/4'>
+        <View className='h-1/6 w-full p-1'>
+          <View className='w-full p-1 flex-row justify-start items-center'>
+            <View className='bg-cyan-950 rounded-full p-1'>
+              <Text className='text-white'>LH</Text>
+            </View>
+            <View className='ml-1 bg-cyan-700 p-1'>
+              <Text className='text-white'>공공분양</Text>
+            </View>
+          </View>
+          <View className='border-b border-b-slate-300' />
+          <View className='mt-4 px-6 flex-row items-center justify-evenly'>
             <TouchableOpacity
               className='p-4 bg-primary rounded-md shadow-md'
               onPress={() => {}}

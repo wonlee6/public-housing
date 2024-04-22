@@ -6,7 +6,7 @@ export async function fetchNoticeInfo(): Promise<PublicHousingModel> {
   const pageSize = `${encodeURIComponent('PG_SZ')}=${encodeURIComponent('50')}`
   const page = `${encodeURIComponent('PAGE')}=${encodeURIComponent('1')}`
   const 공고중 = `${encodeURIComponent('PAN_SS')}=${encodeURIComponent('공고중')}`
-  const startDate = `${encodeURIComponent('PAN_ST_DT')}=${encodeURIComponent('20240401')}`
+  const startDate = `${encodeURIComponent('PAN_ST_DT')}=${encodeURIComponent('20240410')}`
   const url = `${address}?serviceKey=${serviceKey}&${pageSize}&${page}&${공고중}&${startDate}`
 
   const response = await fetch(url)

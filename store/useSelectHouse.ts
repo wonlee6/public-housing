@@ -7,11 +7,13 @@ type State = {
 
 type Action = {
   handleSelectHouse: (house: PublicHousingDetailModel) => void
+  handleClearHouse: () => void
 }
 
 const useSelectHouse = create<State & Action>()((set) => ({
   selectedHouse: null,
-  handleSelectHouse: (house) => set({ selectedHouse: house })
+  handleSelectHouse: (house) => set({ selectedHouse: house }),
+  handleClearHouse: () => set({selectedHouse: null})
 }))
 
 export default useSelectHouse

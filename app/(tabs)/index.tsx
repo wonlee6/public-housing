@@ -1,6 +1,7 @@
-import { useEffect, useMemo, useState } from 'react'
-import { ActivityIndicator, StyleSheet, TouchableOpacity } from 'react-native'
-import MapView from 'react-native-maps'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { ActivityIndicator, StyleSheet } from 'react-native'
+import MapView, { MapPressEvent } from 'react-native-maps'
+import { MaterialCommunityIcons } from '@expo/vector-icons'
 
 import { convertCityName } from '@/lib/utils'
 import { initRegionLocation } from '@/data/inital-region'
@@ -11,6 +12,7 @@ import usePublicHousingNotice from '@/hooks/usePublicHousingNoti'
 import useSelectHouse from '@/store/useSelectHouse'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { Text, View } from '@/components/Themed'
+import { ExternalLink } from '@/components/ExternalLink'
 
 type ConvertCount = {
   count: number
@@ -20,10 +22,11 @@ type ConvertCount = {
 export default function TabOneScreen() {
   const { data, error, isLoading } = usePublicHousingNotice()
 
-  const handleRegion = useRegion((state) => state.handleRegion)
   const region = useRegion((state) => state.region)
+  const handleRegion = useRegion((state) => state.handleRegion)
 
   const selectedHouse = useSelectHouse((state) => state.selectedHouse)
+  const handleClearHouse = useSelectHouse((state) => state.handleClearHouse)
 
   const [isRatio, setIsRatio] = useState(false)
 
@@ -64,35 +67,52 @@ export default function TabOneScreen() {
     setIsRatio(false)
   }, [region])
 
+  const filteredHouseURL = useMemo(() => {
+    if (!selectedHouse || !data) return ''
+
+    if (selectedHouse && data && data[1].dsList) {
+      if (selectedHouse[0].dsSch) {
+        const pan_id = selectedHouse[0].dsSch[0].PAN_ID
+        const item = data[1].dsList.find((i) => i.PAN_ID === pan_id)
+        return item?.DTL_URL
+      }
+    }
+  }, [selectedHouse, data])
+
+  const handlePressMap = useCallback((event: MapPressEvent) => {
+    const action = event.nativeEvent.action
+    if (typeof action === 'undefined') {
+      handleClearHouse()
+    }
+  }, [])
+
   if (error) {
     return null
   }
 
-  useEffect(() => console.log(selectedHouse), [selectedHouse])
-
   return (
-    <SafeAreaView className='h-full flex-col' edges={{ bottom: 'off' }}>
+    <SafeAreaView className='flex-1 relative'>
       {isLoading ? <ActivityIndicator size={'large'} /> : null}
       <MapView
         provider='google'
-        // style={styles.map}
-        className={selectedHouse ? 'h-5/6' : 'h-full'}
+        style={styles.map}
         region={region}
         onRegionChangeComplete={(region, details) => {
           if (details.isGesture) {
             handleRegion(region)
           }
         }}
+        onPress={handlePressMap}
       >
-        {!isRatio || isLoading ? (
+        {!isRatio ? (
           <InitMarker markerList={filteredPublicHousingData} />
         ) : (
           <DetailMarker publicHousingData={data} />
         )}
       </MapView>
       {selectedHouse ? (
-        <View className='h-1/6 w-full p-1'>
-          <View className='w-full p-1 flex-row justify-start items-center'>
+        <View className='h-[60px] w-full p-1 flex-row items-center justify-center backdrop-blur-md bg-white/60 absolute bottom-0'>
+          <View className='w-1/3 p-1 flex-row justify-center items-center bg-transparent border-r border-r-slate-400 '>
             <View className='bg-cyan-950 rounded-full p-1'>
               <Text className='text-white'>LH</Text>
             </View>
@@ -100,20 +120,18 @@ export default function TabOneScreen() {
               <Text className='text-white'>공공분양</Text>
             </View>
           </View>
-          <View className='border-b border-b-slate-300' />
-          <View className='mt-4 px-6 flex-row items-center justify-evenly'>
-            <TouchableOpacity
-              className='p-4 bg-primary rounded-md shadow-md'
-              onPress={() => {}}
-            >
-              <Text className='text-white font-bold'>모집 공고</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              className='p-4 bg-secondary rounded-md shadow-md'
-              onPress={() => {}}
-            >
-              <Text className='text-white font-bold'>청약 센터</Text>
-            </TouchableOpacity>
+          <View className='w-2/3 p-1 items-center justify-center bg-transparent'>
+            <View className='px-3 py-1 items-center justify-center bg-primary rounded-lg shadow-lg'>
+              <ExternalLink disabled={!filteredHouseURL} href={filteredHouseURL!}>
+                <View className='pt-1 flex-row items-center justify-center bg-transparent'>
+                  <MaterialCommunityIcons
+                    name='home-import-outline'
+                    style={{ fontSize: 20, color: 'white' }}
+                  />
+                  <Text className='ml-1 text-white font-bold '>모집 공고문 보러가기</Text>
+                </View>
+              </ExternalLink>
+            </View>
           </View>
         </View>
       ) : null}
@@ -124,8 +142,5 @@ export default function TabOneScreen() {
 const styles = StyleSheet.create({
   map: {
     ...StyleSheet.absoluteFillObject
-  },
-  button: {
-    backgroundColor: '#006FEE'
   }
 })

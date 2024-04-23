@@ -1,12 +1,12 @@
-import { PublicHousingDetailModel } from '@/model/public-housing'
+import { PublicHousing } from '@/model/public-housing'
 import { create } from 'zustand'
 
 type State = {
-  selectedHouse: PublicHousingDetailModel | null
+  selectedHouse: PublicHousing | null
 }
 
 type Action = {
-  handleSelectHouse: (house: PublicHousingDetailModel) => void
+  handleSelectHouse: (house: PublicHousing | null) => void
   handleClearHouse: () => void
 }
 

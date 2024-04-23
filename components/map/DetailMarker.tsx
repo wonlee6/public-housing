@@ -25,48 +25,51 @@ export default function DetailMarker({ publicHousingData }: DetailMarker) {
 
   return (
     <>
-      {(filteredMarkerData as PublicHousingDetailModel[]).map((item, index) => (
+      {/* {(filteredMarkerData as PublicHousingDetailModel[]).map((item, index) => (
         <MarkerConfig key={index} {...item} index={index} />
-      ))}
+      ))} */}
     </>
   )
 }
 
-function MarkerConfig(props: PublicHousingDetailModel & { index?: number }) {
-  const handleSelectHouse = useSelectHouse((state) => state.handleSelectHouse)
+const MarkerConfig = React.memo(
+  (props: PublicHousingDetailModel & { index?: number }) => {
+    const handleSelectHouse = useSelectHouse((state) => state.handleSelectHouse)
 
-  const houseType = (props as any)[0].dsSch[0].SPL_INF_TP_CD
-  const isInvalidType = invalidType(houseType)
+    const houseType = (props as any)[0].dsSch[0].SPL_INF_TP_CD
+    // console.log(houseType)
+    const isInvalidType = invalidType(houseType)
 
-  const 단지정보 = useMemo(() => {
-    return props[1]?.dsSbd
-  }, [props])
+    const 단지정보 = useMemo(() => {
+      return props[1]?.dsSbd
+    }, [props])
 
-  const handleSelectMarker = useCallback(() => {
-    handleSelectHouse(props)
-  }, [단지정보])
+    const handleSelectMarker = useCallback(() => {
+      handleSelectHouse(props)
+    }, [단지정보])
 
-  if (isInvalidType) {
-    return null
+    if (isInvalidType) {
+      return null
+    }
+
+    if (!단지정보) {
+      return null
+    }
+
+    return (
+      <>
+        {단지정보.map((item, index) => (
+          <MarkerComponent
+            key={index}
+            {...item}
+            houseType={houseType}
+            onSelectMarker={handleSelectMarker}
+          />
+        ))}
+      </>
+    )
   }
-
-  if (!단지정보) {
-    return null
-  }
-
-  return (
-    <>
-      {단지정보.map((item, index) => (
-        <MarkerComponent
-          key={index}
-          {...item}
-          houseType={houseType}
-          onSelectMarker={handleSelectMarker}
-        />
-      ))}
-    </>
-  )
-}
+)
 
 type DetailHouse = {
   onSelectMarker: () => void
@@ -108,23 +111,25 @@ const MarkerComponent = React.memo((props: DetailHouse) => {
   const 단지이름 = props.BZDT_NM ? props.BZDT_NM : props.LCC_NT_NM
   const name = convertName(props.houseType)
 
-  if (단지이름 === '파주운정3(07,택1) A23') {
-    data.latitude = 37.7136754
-    data.longitude = 126.754735
-  }
+  // if (단지이름 === '파주운정3(07,택1) A23') {
+  //   data.latitude = 37.7136754
+  //   data.longitude = 126.754735
+  // }
 
   return (
     <Marker coordinate={data} onPress={() => props.onSelectMarker()}>
-      <View className='max-w-[100] shadow-md rounded-sm'>
-        <View className='bg-indigo-900 w-full rounded-sm'>
-          <Text className='text-yellow-50 text-center p-1'>
-            LH
-            {name}
+      <View className='max-w-[100] shadow-md rounded-md'>
+        <View className='bg-[#7828C8] w-full flex-col rounded-md'>
+          <View className='flex-row items-center justify-center'>
+            <View className='bg-neutral-100 rounded-full px-1'>
+              <Text className='text-cyan-500 font-bold text-xs'>LH</Text>
+            </View>
+            <Text className='text-yellow-50 text-center p-1'>{name}</Text>
+          </View>
+          <Text className='p-1 text-center text-ellipsis bg-white text-slate-600'>
+            {단지이름}
           </Text>
         </View>
-        <Text className='p-1 text-center text-ellipsis bg-white text-slate-600'>
-          {단지이름}
-        </Text>
       </View>
     </Marker>
   )
@@ -133,11 +138,14 @@ const MarkerComponent = React.memo((props: DetailHouse) => {
 function invalidType(SPL_INF_TP_CD: string) {
   switch (SPL_INF_TP_CD) {
     case '050': // 분양주택
+    case '051': // 분양주택-전환
     case '060': // 공공임대
     case '061': // 임대주택
     case '131': // 청년매입임대
     case '132': // 신혼부부매입임대
     case '133': // 집주인리모델링
+    case '135': // 다가구매입임대
+    case '136': // 장기미임대
     case '390': // 신혼희망타운
     case '1315': // 청년매입임대수시
     case '1325': // 신혼부부매입임대수시
@@ -151,6 +159,8 @@ function convertName(SPL_INF_TP_CD: string) {
   switch (SPL_INF_TP_CD) {
     case '050':
       return '분양주택'
+    case '051':
+      return '분양주택(전환)'
     case '060':
       return '공공임대'
     case '061':
@@ -159,6 +169,10 @@ function convertName(SPL_INF_TP_CD: string) {
       return '청년매입임대'
     case '132':
       return '신혼부부매입임대'
+    case '135':
+      return '다가구매입임대'
+    case '136':
+      return '장기미임대'
     case '1315':
       return '청년매입임대수시'
     case '1325':

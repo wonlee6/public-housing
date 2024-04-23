@@ -39,18 +39,26 @@ export async function fetchNoticeInfoDetail(
 ): Promise<PublicHousingDetailModel> {
   const 분양임대공고별상세정보조회 =
     'http://apis.data.go.kr/B552555/lhLeaseNoticeDtlInfo1/getLeaseNoticeDtlInfo1'
-  const 공급정보구분코드 = `${encodeURIComponent('SPL_INF_TP_CD')}=${encodeURIComponent(
-    request.SPL_INF_TP_CD
-  )}`
-  const 고객센터연계시스템구분코드 = `${encodeURIComponent(
-    'CCR_CNNT_SYS_DS_CD'
-  )}=${encodeURIComponent(request.CCR_CNNT_SYS_DS_CD)}`
-  const 공고아이디 = `${encodeURIComponent('PAN_ID')}=${encodeURIComponent(
-    request.PAN_ID
-  )}`
-  const 상위매물유형코드 = `${encodeURIComponent('UPP_AIS_TP_CD')}=${encodeURIComponent(
-    request.UPP_AIS_TP_CD
-  )}`
+  // const 공급정보구분코드 = `${encodeURIComponent('SPL_INF_TP_CD')}=${encodeURIComponent(
+  //   request.SPL_INF_TP_CD
+  // )}`
+  const 공급정보구분코드 = `SPL_INF_TP_CD=${request.SPL_INF_TP_CD}`
+
+  // const 고객센터연계시스템구분코드 = `${encodeURIComponent(
+  //   'CCR_CNNT_SYS_DS_CD'
+  // )}=${encodeURIComponent(request.CCR_CNNT_SYS_DS_CD)}`
+
+  const 고객센터연계시스템구분코드 = `CCR_CNNT_SYS_DS_CD=${request.CCR_CNNT_SYS_DS_CD}`
+
+  // const 공고아이디 = `${encodeURIComponent('PAN_ID')}=${encodeURIComponent(
+  //   request.PAN_ID
+  // )}`
+  const 공고아이디 = `PAN_ID=${request.PAN_ID}`
+
+  const 상위매물유형코드 = `UPP_AIS_TP_CD=${request.UPP_AIS_TP_CD}`
+  // const 상위매물유형코드 = `${encodeURIComponent('UPP_AIS_TP_CD')}=${encodeURIComponent(
+  //   request.UPP_AIS_TP_CD
+  // )}`
   let notiInfoUrl = `${분양임대공고별상세정보조회}?serviceKey=${serviceKey}&${공급정보구분코드}&${고객센터연계시스템구분코드}&${공고아이디}&${상위매물유형코드}`
 
   if (request.AIS_TP_CD) {

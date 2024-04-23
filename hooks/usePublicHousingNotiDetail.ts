@@ -4,6 +4,13 @@ import { PublicHousing, PublicHousingDetailModel } from '@/model/public-housing'
 import { fetchNoticeInfoDetail } from '@/service/public_house'
 
 const usePublicHousingNotiDetail = (data: PublicHousing[] | undefined) => {
+  if (typeof data === 'undefined') {
+    return {
+      houseDetailData: [],
+      pending: true
+    }
+  }
+  
   const handleCombine = useCallback(
     (result: UseQueryResult<PublicHousingDetailModel, Error>[]) => {
       return {
@@ -14,12 +21,6 @@ const usePublicHousingNotiDetail = (data: PublicHousing[] | undefined) => {
     []
   )
 
-  if (typeof data === 'undefined') {
-    return {
-      houseDetailData: [],
-      pending: true
-    }
-  }
   return useQueries({
     queries: data.map((item, index) => ({
       queryKey: [`${item.PAN_ID}-${String(index)}`, item.PAN_ID],

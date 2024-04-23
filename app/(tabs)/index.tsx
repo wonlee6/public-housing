@@ -7,12 +7,12 @@ import { convertCityName } from '@/lib/utils'
 import { initRegionLocation } from '@/data/inital-region'
 import useRegion from '@/store/useRegion'
 import InitMarker from '@/components/map/InitMarker'
-import DetailMarker from '@/components/map/DetailMarker'
 import usePublicHousingNotice from '@/hooks/usePublicHousingNoti'
 import useSelectHouse from '@/store/useSelectHouse'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { Text, View } from '@/components/Themed'
 import { ExternalLink } from '@/components/ExternalLink'
+import DetailM from '@/components/map/DetailM'
 
 type ConvertCount = {
   count: number
@@ -31,8 +31,9 @@ export default function TabOneScreen() {
   const [isRatio, setIsRatio] = useState(false)
 
   const filteredPublicHousingData = useMemo(() => {
-    if (!isRatio && data && data[1]?.dsList && data[1]?.dsList?.length > 0) {
-      const convertHomeData = data[1].dsList.reduce((acc: ConvertCount[], cur) => {
+    if (data && data[1]?.dsList && data[1]?.dsList?.length > 0) {
+      const filterData = data[1].dsList.filter((i) => invalidType(i.SPL_INF_TP_CD))
+      const convertHomeData = filterData.reduce((acc: ConvertCount[], cur) => {
         const curCity = convertCityName(cur.CNP_CD_NM)
         const findItem = acc.find((v) => v.city === curCity)
         if (findItem) {
@@ -57,7 +58,7 @@ export default function TabOneScreen() {
       })
     }
     return []
-  }, [data, isRatio])
+  }, [data])
 
   useEffect(() => {
     if (region.latitudeDelta < 2) {
@@ -67,24 +68,18 @@ export default function TabOneScreen() {
     setIsRatio(false)
   }, [region])
 
-  const filteredHouseURL = useMemo(() => {
-    if (!selectedHouse || !data) return ''
-
-    if (selectedHouse && data && data[1].dsList) {
-      if (selectedHouse[0].dsSch) {
-        const pan_id = selectedHouse[0].dsSch[0].PAN_ID
-        const item = data[1].dsList.find((i) => i.PAN_ID === pan_id)
-        return item?.DTL_URL
-      }
-    }
-  }, [selectedHouse, data])
-
   const handlePressMap = useCallback((event: MapPressEvent) => {
     const action = event.nativeEvent.action
     if (typeof action === 'undefined') {
       handleClearHouse()
     }
   }, [])
+
+  const filteredHouseData = useMemo(() => {
+    if (!data) return []
+
+    return data[1].dsList?.filter((i) => invalidType(i.SPL_INF_TP_CD)) ?? []
+  }, [data])
 
   if (error) {
     return null
@@ -107,22 +102,27 @@ export default function TabOneScreen() {
         {!isRatio ? (
           <InitMarker markerList={filteredPublicHousingData} />
         ) : (
-          <DetailMarker publicHousingData={data} />
+          <DetailM publicHousingData={filteredHouseData} />
         )}
       </MapView>
       {selectedHouse ? (
-        <View className='h-[60px] w-full p-1 flex-row items-center justify-center backdrop-blur-md bg-white/60 absolute bottom-0'>
+        <View className='h-[70px] w-full p-1 flex-row items-center justify-center backdrop-blur-md bg-white/60 absolute bottom-0'>
           <View className='w-1/3 p-1 flex-row justify-center items-center bg-transparent border-r border-r-slate-400 '>
-            <View className='bg-cyan-950 rounded-full p-1'>
-              <Text className='text-white'>LH</Text>
+            <View className='bg-neutral-100 rounded-full p-1'>
+              <Text className='text-cyan-500 font-bold'>LH</Text>
             </View>
-            <View className='ml-1 bg-cyan-700 p-1'>
-              <Text className='text-white'>공공분양</Text>
+            <View className='ml-1 bg-[#7828C8] rounded-lg py-1 px-2'>
+              <Text className='text-white font-semibold'>
+                {selectedHouse ? selectedHouse.AIS_TP_CD_NM : ''}
+              </Text>
             </View>
           </View>
-          <View className='w-2/3 p-1 items-center justify-center bg-transparent'>
+          <View className='w-2/3 p-1 flex-col items-center justify-center bg-transparent'>
             <View className='px-3 py-1 items-center justify-center bg-primary rounded-lg shadow-lg'>
-              <ExternalLink disabled={!filteredHouseURL} href={filteredHouseURL!}>
+              <ExternalLink
+                disabled={!selectedHouse}
+                href={selectedHouse ? selectedHouse.DTL_URL : ''}
+              >
                 <View className='pt-1 flex-row items-center justify-center bg-transparent'>
                   <MaterialCommunityIcons
                     name='home-import-outline'
@@ -131,6 +131,11 @@ export default function TabOneScreen() {
                   <Text className='ml-1 text-white font-bold '>모집 공고문 보러가기</Text>
                 </View>
               </ExternalLink>
+            </View>
+            <View className='bg-transparent mt-1'>
+              <Text>{`기간 : ${selectedHouse ? selectedHouse.PAN_NT_ST_DT : ''} ~ ${
+                selectedHouse ? selectedHouse.CLSG_DT : ''
+              }`}</Text>
             </View>
           </View>
         </View>
@@ -144,3 +149,24 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject
   }
 })
+
+function invalidType(SPL_INF_TP_CD: string) {
+  switch (SPL_INF_TP_CD) {
+    case '050': // 분양주택
+    case '051': // 분양주택-전환
+    case '060': // 공공임대
+    case '061': // 임대주택
+    case '062': // 영구임대
+    case '131': // 청년매입임대
+    case '132': // 신혼부부매입임대
+    case '133': // 집주인리모델링
+    case '135': // 다가구매입임대
+    case '136': // 장기미임대
+    case '390': // 신혼희망타운
+    case '1315': // 청년매입임대수시
+    case '1325': // 신혼부부매입임대수시
+      return true
+    default:
+      return false
+  }
+}

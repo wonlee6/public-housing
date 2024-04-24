@@ -16,50 +16,52 @@ type DetailMarker = {
 export default function DetailMarker({ publicHousingData, isRatio }: DetailMarker) {
   return (
     <>
-      {publicHousingData.map((item) => (
-        <MarkerContainer key={item.PAN_ID} {...item} isRatio={isRatio} />
+      {publicHousingData.map((item, index) => (
+        <MarkerContainer key={item.PAN_ID} {...item} isRatio={isRatio} idx={index} />
       ))}
     </>
   )
 }
 
-const MarkerContainer = React.memo((props: PublicHousing & { isRatio: boolean }) => {
-  const { isRatio, ...rest } = props
-  const { data, error } = useLHPublicHousingDetail(rest)
+const MarkerContainer = React.memo(
+  (props: PublicHousing & { isRatio: boolean; idx: number }) => {
+    const { isRatio, idx, ...rest } = props
+    const { data, error } = useLHPublicHousingDetail(rest)
 
-  const houseType = rest.SPL_INF_TP_CD
-  const isInvalidType = isHouseType(houseType)
+    const houseType = rest.SPL_INF_TP_CD
+    const isInvalidType = isHouseType(houseType)
 
-  const filteredHouseData = useMemo(() => {
-    if (data && data[1] && data[1].dsSbd) {
-      return {
-        ...rest,
-        dsSbd: data[1].dsSbd
+    const filteredHouseData = useMemo(() => {
+      if (data && data[1] && data[1].dsSbd) {
+        return {
+          ...rest,
+          dsSbd: data[1].dsSbd
+        }
       }
+      return undefined
+    }, [data])
+
+    if (error || !isInvalidType) {
+      return null
     }
-    return undefined
-  }, [data])
 
-  if (error || !isInvalidType) {
-    return null
+    return (
+      <>
+        {filteredHouseData?.dsSbd?.map((item, index) => (
+          <MarkerComponent
+            key={index}
+            {...item}
+            pan_id={props.PAN_ID}
+            houseType={houseType}
+            index={idx}
+            houseTypeName={props.AIS_TP_CD_NM}
+            isRatio={isRatio}
+          />
+        ))}
+      </>
+    )
   }
-
-  return (
-    <>
-      {filteredHouseData?.dsSbd?.map((item, index) => (
-        <MarkerComponent
-          key={index}
-          {...item}
-          pan_id={props.PAN_ID}
-          houseType={houseType}
-          index={index}
-          houseTypeName={props.AIS_TP_CD_NM}
-          isRatio={isRatio}
-        />
-      ))}
-    </>
-  )
-})
+)
 
 const titleColor = {
   행복주택: '#7828C8',
@@ -113,13 +115,16 @@ const MarkerComponent = React.memo(
         {isRatio ? (
           <Marker
             coordinate={{
-              latitude: data.latitude + Number(`0.00${index}`),
-              longitude: data.longitude + Number(`0.00${index}`)
+              latitude: data.latitude + Number(`0.000${index}`),
+              longitude: data.longitude + Number(`0.000${index}`)
             }}
             onPress={() => handleSelectHouse(pan_id)}
           >
-            <View className='max-w-[100] rounded-md shadow-md'>
-              <View className={`w-full flex-col rounded-md bg-[${color}]`}>
+            <View className='max-w-[100] rounded-md'>
+              <View
+                className='w-full flex-col rounded-md'
+                style={{ backgroundColor: color }}
+              >
                 <View className='flex-row items-center justify-center'>
                   <View className='rounded-full bg-neutral-100 px-1'>
                     <Text className='text-xs font-bold text-cyan-500'>LH</Text>

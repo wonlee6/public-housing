@@ -3,7 +3,7 @@ import { ActivityIndicator, StyleSheet } from 'react-native'
 import MapView, { MapPressEvent } from 'react-native-maps'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
 
-import { convertCityName, isHouseType } from '@/lib/utils'
+import { isHouseType } from '@/lib/utils'
 import { initRegionLocation } from '@/data/inital-region'
 import useRegion from '@/store/useRegion'
 import InitMarker from '@/components/map/InitMarker'
@@ -12,11 +12,14 @@ import useSelectHouse from '@/store/useSelectHouse'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { Text, View } from '@/components/Themed'
 import { ExternalLink } from '@/components/ExternalLink'
-import DetailM from '@/components/map/DetailMarker'
+import DetailMarker from '@/components/map/DetailMarker'
 
-type ConvertCount = {
+type ConvertRegion = {
   count: number
   city: string
+  name?: string
+  lat?: number
+  lng?: number
 }
 
 export default function TabOneScreen() {
@@ -31,20 +34,22 @@ export default function TabOneScreen() {
   const [isRatio, setIsRatio] = useState(false)
 
   const filteredPublicHousingData = useMemo(() => {
-    if (data && data[1]?.dsList && data[1]?.dsList?.length > 0) {
-      const filterData = data[1].dsList.filter((i) => isHouseType(i.SPL_INF_TP_CD))
-      const convertHomeData = filterData.reduce((acc: ConvertCount[], cur) => {
-        const curCity = convertCityName(cur.CNP_CD_NM)
-        const findItem = acc.find((v) => v.city === curCity)
-        if (findItem) {
-          return acc.map((i) => (i.city === curCity ? { ...i, count: i.count + 1 } : i))
-        } else {
-          return acc.concat({ city: curCity, count: 1 })
-        }
-      }, [])
+    if (data && data[1]?.dsList && data[1].dsList.length > 0) {
+      const filterData = data[1].dsList
+        .filter((i) => isHouseType(i.SPL_INF_TP_CD))
+        .reduce((acc: ConvertRegion[], cur) => {
+          const findItem = acc.find((v) => v.city === cur.CNP_CD_NM)
+          if (findItem) {
+            return acc.map((i) =>
+              i.city === cur.CNP_CD_NM ? { ...i, count: i.count + 1 } : i
+            )
+          } else {
+            return [...acc, { city: cur.CNP_CD_NM, count: 1 }]
+          }
+        }, [])
 
       return initRegionLocation.map((item) => {
-        const findItem = convertHomeData.find((i) => i.city === item.city)
+        const findItem = filterData.find((i) => i.city === item.city)
         if (findItem) {
           return {
             ...item,
@@ -104,11 +109,8 @@ export default function TabOneScreen() {
         }}
         onPress={handlePressMap}
       >
-        {!isRatio ? (
-          <InitMarker markerList={filteredPublicHousingData} />
-        ) : (
-          <DetailM publicHousingData={filteredHouseData} />
-        )}
+        <InitMarker markerList={filteredPublicHousingData} isRatio={isRatio} />
+        <DetailMarker publicHousingData={filteredHouseData} isRatio={isRatio} />
       </MapView>
       {filteredSelectedHouse ? (
         <View className='absolute bottom-0 h-[70px] w-full flex-row items-center justify-center bg-white/60 p-1 backdrop-blur-md'>

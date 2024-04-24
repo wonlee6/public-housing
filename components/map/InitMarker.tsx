@@ -9,13 +9,15 @@ type MarkerModel = {
   lat: number
   lng: number
   city: string
+  name: string
 }
 
 type InitMarker = {
   markerList: MarkerModel[]
+  isRatio: boolean
 }
 
-export default function InitMarker({ markerList }: InitMarker) {
+export default function InitMarker({ markerList, isRatio }: InitMarker) {
   const handleMapRatio = useRegion((state) => state.handleMapRatio)
 
   const handleSelectProvince = useCallback((province: string) => {
@@ -30,6 +32,7 @@ export default function InitMarker({ markerList }: InitMarker) {
           key={item.city}
           {...item}
           onSelectProvince={handleSelectProvince}
+          isRatio={isRatio}
         />
       ))}
     </>
@@ -37,30 +40,32 @@ export default function InitMarker({ markerList }: InitMarker) {
 }
 
 const MarkerComponent = React.memo(
-  ({
-    city,
-    count,
-    lat,
-    lng,
-    onSelectProvince
-  }: MarkerModel & {
-    onSelectProvince: (province: string) => void
-  }) => {
+  (
+    props: MarkerModel & {
+      onSelectProvince: (province: string) => void
+      isRatio: boolean
+    }
+  ) => {
+    const { city, name, count, lat, lng, isRatio, onSelectProvince } = props
     return (
-      <Marker
-        coordinate={{
-          latitude: lat,
-          longitude: lng
-        }}
-        onPress={() => onSelectProvince(city)}
-      >
-        <View className='w-[60] shadow-md rounded-sm'>
-          <View className='bg-indigo-900 w-full rounded-sm'>
-            <Text className='text-yellow-50 text-center p-1'>{city}</Text>
-          </View>
-          <Text className='bg-white text-center'>{count}</Text>
-        </View>
-      </Marker>
+      <>
+        {isRatio ? null : (
+          <Marker
+            coordinate={{
+              latitude: lat,
+              longitude: lng
+            }}
+            onPress={() => onSelectProvince(name)}
+          >
+            <View className='w-[60] rounded-sm shadow-md'>
+              <View className='w-full rounded-sm bg-indigo-900'>
+                <Text className='p-1 text-center text-yellow-50'>{name}</Text>
+              </View>
+              <Text className='bg-white text-center'>{count}</Text>
+            </View>
+          </Marker>
+        )}
+      </>
     )
   }
 )

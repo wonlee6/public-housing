@@ -1,4 +1,6 @@
 import { LatLng } from 'react-native-maps'
+import { type ClassValue, clsx } from 'clsx'
+import { twMerge } from 'tailwind-merge'
 
 export function convertCityName(CNP_CD_NM: string): string {
   switch (CNP_CD_NM) {
@@ -178,4 +180,8 @@ export function isHouseType(SPL_INF_TP_CD: string) {
     default:
       return false
   }
+}
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs))
 }

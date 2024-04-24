@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { ActivityIndicator, StyleSheet } from 'react-native'
+import { ActivityIndicator, Platform, StyleSheet } from 'react-native'
+import { SafeAreaView } from 'react-native-safe-area-context'
 import MapView, { MapPressEvent } from 'react-native-maps'
-import { MaterialCommunityIcons } from '@expo/vector-icons'
+import * as WebBrowser from 'expo-web-browser'
 
 import { isHouseType } from '@/lib/utils'
 import { initRegionLocation } from '@/data/inital-region'
@@ -9,10 +10,9 @@ import useRegion from '@/store/useRegion'
 import InitMarker from '@/components/map/InitMarker'
 import usePublicHousingNotice from '@/hooks/useLHPublicHousing'
 import useSelectHouse from '@/store/useSelectHouse'
-import { SafeAreaView } from 'react-native-safe-area-context'
 import { Text, View } from '@/components/Themed'
-import { ExternalLink } from '@/components/ExternalLink'
 import DetailMarker from '@/components/map/DetailMarker'
+import { Button } from '@/components/ui/button'
 
 type ConvertRegion = {
   count: number
@@ -125,7 +125,7 @@ export default function TabOneScreen() {
             </View>
           </View>
           <View className='w-2/3 flex-col items-center justify-center bg-transparent p-1'>
-            <View className='items-center justify-center rounded-lg bg-primary px-3 py-1 shadow-lg'>
+            {/* <View className='items-center justify-center rounded-lg bg-primary px-3 py-1 shadow-lg'>
               <ExternalLink
                 disabled={!filteredSelectedHouse}
                 href={filteredSelectedHouse.DTL_URL}
@@ -138,7 +138,18 @@ export default function TabOneScreen() {
                   <Text className='ml-1 font-bold text-white '>모집 공고문 보러가기</Text>
                 </View>
               </ExternalLink>
-            </View>
+            </View> */}
+            <Button
+              label='모집 공고문 보러가기'
+              labelClasses='text-white'
+              size={'sm'}
+              onPress={(e) => {
+                if (Platform.OS !== 'web') {
+                  e.preventDefault()
+                  WebBrowser.openBrowserAsync(filteredSelectedHouse.DTL_URL as string)
+                }
+              }}
+            />
             <View className='mt-1 bg-transparent'>
               <Text>{`기간 : ${filteredSelectedHouse.PAN_NT_ST_DT} ~ ${filteredSelectedHouse.CLSG_DT}`}</Text>
             </View>

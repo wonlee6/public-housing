@@ -9,11 +9,11 @@ import { useColorScheme } from '@/components/useColorScheme'
 import { useClientOnlyValue } from '@/components/useClientOnlyValue'
 
 // You can explore the built-in icon families and icons on the web at https://icons.expo.fyi/
-function TabBarIcon(props: {
+function TabBarMapIcon(props: {
   name: React.ComponentProps<typeof FontAwesome>['name']
   color: string
 }) {
-  return <FontAwesome size={28} style={{ marginBottom: -3 }} {...props} />
+  return <FontAwesome size={24} style={{ marginBottom: -3 }} {...props} />
 }
 
 export default function TabLayout() {
@@ -32,7 +32,7 @@ export default function TabLayout() {
         name='index'
         options={{
           title: '지도',
-          tabBarIcon: ({ color }) => <TabBarIcon name='map' color={color} />,
+          tabBarIcon: ({ color }) => <TabBarMapIcon name='map' color={color} />,
           // headerRight: () => (
           //   <Link href="/modal" asChild>
           //     <Pressable>
@@ -55,7 +55,12 @@ export default function TabLayout() {
         options={{
           title: '공고목록',
           tabBarIcon: ({ color }) => (
-            <MaterialCommunityIcons name='file-document-outline' color={color} />
+            <MaterialCommunityIcons
+              name='file-document-outline'
+              color={color}
+              size={24}
+              style={{ marginBottom: -3 }}
+            />
           )
         }}
       />
@@ -64,7 +69,12 @@ export default function TabLayout() {
         options={{
           title: 'QnA',
           tabBarIcon: ({ color }) => (
-            <MaterialCommunityIcons name='comment-search-outline' color={color} />
+            <MaterialCommunityIcons
+              name='comment-search-outline'
+              color={color}
+              size={24}
+              style={{ marginBottom: -3 }}
+            />
           )
         }}
       />

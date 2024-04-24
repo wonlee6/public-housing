@@ -115,8 +115,8 @@ const MarkerComponent = React.memo(
         {isRatio ? (
           <Marker
             coordinate={{
-              latitude: data.latitude + Number(`0.000${index}`),
-              longitude: data.longitude + Number(`0.000${index}`)
+              latitude: data.latitude + Number(`0.000${index + randomNum()}`),
+              longitude: data.longitude + Number(`0.000${index + randomNum()}`)
             }}
             onPress={() => handleSelectHouse(pan_id)}
           >
@@ -144,3 +144,7 @@ const MarkerComponent = React.memo(
     )
   }
 )
+
+function randomNum(): number {
+  return Math.floor(Math.random() * 10)
+}

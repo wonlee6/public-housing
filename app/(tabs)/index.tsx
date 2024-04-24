@@ -13,6 +13,7 @@ import useSelectHouse from '@/store/useSelectHouse'
 import { Text, View } from '@/components/Themed'
 import DetailMarker from '@/components/map/DetailMarker'
 import { Button } from '@/components/ui/button'
+import useLHPublicHouse from '@/store/useLHPublicHouse'
 
 type ConvertRegion = {
   count: number
@@ -84,6 +85,14 @@ export default function TabOneScreen() {
     if (!data) return []
     return data[1].dsList?.filter((i) => isHouseType(i.SPL_INF_TP_CD)) ?? []
   }, [data])
+
+  const getPublicHouse = useLHPublicHouse((state) => state.getPublicHouse)
+
+  useEffect(() => {
+    if (filteredHouseData.length > 0) {
+      getPublicHouse(filteredHouseData)
+    }
+  }, [filteredHouseData])
 
   const filteredSelectedHouse = useMemo(() => {
     if (!selectedHouse || !data) return null

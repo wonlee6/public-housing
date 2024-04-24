@@ -1,185 +1,133 @@
-import React, { useCallback, useMemo } from 'react'
+import React, { useMemo } from 'react'
 import { Text, View } from 'react-native'
 import { Marker } from 'react-native-maps'
-import { PublicHousingDetailModel, PublicHousingModel } from '@/model/public-housing'
-import useCoordinateByAddress from '@/hooks/useCoordinateByAddress'
-import usePublicHousingNotiDetail from '@/hooks/usePublicHousingNotiDetail'
+
+import { DsSbdModel, PublicHousing } from '@/model/public-housing'
+import useLHPublicHousingDetail from '@/hooks/useLHPublicHousingDetail'
 import useSelectHouse from '@/store/useSelectHouse'
+import useCoordinateByAddress from '@/hooks/useCoordinateByAddress'
+import { isHouseType } from '@/lib/utils'
 
 type DetailMarker = {
-  publicHousingData: PublicHousingModel | undefined
+  publicHousingData: PublicHousing[]
 }
+
 export default function DetailMarker({ publicHousingData }: DetailMarker) {
-  const { houseDetailData, pending } = usePublicHousingNotiDetail(
-    publicHousingData ? publicHousingData[1].dsList : undefined
+  return (
+    <>
+      {publicHousingData.map((item) => (
+        <MarkerContainer key={item.PAN_ID} {...item} />
+      ))}
+    </>
   )
+}
 
-  const filteredMarkerData = useMemo(() => {
-    if (!houseDetailData) return []
-    return houseDetailData.filter((i) => typeof i !== 'undefined')
-  }, [houseDetailData])
+const MarkerContainer = React.memo((props: PublicHousing) => {
+  const { data, error } = useLHPublicHousingDetail(props)
 
-  if (pending) {
+  const houseType = props.SPL_INF_TP_CD
+  const isInvalidType = isHouseType(houseType)
+
+  const filteredHouseData = useMemo(() => {
+    if (data && data[1] && data[1].dsSbd) {
+      return {
+        ...props,
+        dsSbd: data[1].dsSbd
+      }
+    }
+    return undefined
+  }, [data])
+
+  if (error || !isInvalidType) {
     return null
   }
 
   return (
     <>
-      {/* {(filteredMarkerData as PublicHousingDetailModel[]).map((item, index) => (
-        <MarkerConfig key={index} {...item} index={index} />
-      ))} */}
+      {filteredHouseData?.dsSbd?.map((item, index) => (
+        <MarkerComponent
+          key={index}
+          {...item}
+          pan_id={props.PAN_ID}
+          houseType={houseType}
+          index={index}
+          houseTypeName={props.AIS_TP_CD_NM}
+        />
+      ))}
     </>
-  )
-}
-
-const MarkerConfig = React.memo(
-  (props: PublicHousingDetailModel & { index?: number }) => {
-    const handleSelectHouse = useSelectHouse((state) => state.handleSelectHouse)
-
-    const houseType = (props as any)[0].dsSch[0].SPL_INF_TP_CD
-    // console.log(houseType)
-    const isInvalidType = invalidType(houseType)
-
-    const 단지정보 = useMemo(() => {
-      return props[1]?.dsSbd
-    }, [props])
-
-    const handleSelectMarker = useCallback(() => {
-      handleSelectHouse(props)
-    }, [단지정보])
-
-    if (isInvalidType) {
-      return null
-    }
-
-    if (!단지정보) {
-      return null
-    }
-
-    return (
-      <>
-        {단지정보.map((item, index) => (
-          <MarkerComponent
-            key={index}
-            {...item}
-            houseType={houseType}
-            onSelectMarker={handleSelectMarker}
-          />
-        ))}
-      </>
-    )
-  }
-)
-
-type DetailHouse = {
-  onSelectMarker: () => void
-  houseType: string
-  LCT_ARA_DTL_ADR: string // 단지 상세 주소
-  BZDT_NM?: string
-  EDC_FCL_CTS: string
-  MIN_MAX_RSDN_DDO_AR: string
-  SUM_TOT_HSH_CNT: string
-  TFFC_FCL_CTS: string
-  LCT_ARA_ADR: string // 단지 주소
-  CVN_FCL_CTS: string
-  HTN_FMLA_DS_CD_NM: string
-  IDT_FCL_CTS: string
-  SPL_INF_GUD_FCTS: string
-  MVIN_XPC_YM: string
-  LCC_NT_NM?: string
-  LGDN_ADR?: string
-  LGDN_DTL_ADR?: string
-}
-
-const MarkerComponent = React.memo((props: DetailHouse) => {
-  let address = ''
-  if (props.houseType === '061' || props.houseType === '051') {
-    if (props.LGDN_ADR && props.LGDN_DTL_ADR) {
-      address = props.LGDN_ADR + props.LGDN_DTL_ADR
-    }
-  } else if (props.houseType === '050' || props.houseType === '390') {
-    if (props.LCT_ARA_ADR && props.LCT_ARA_DTL_ADR) {
-      address = props.LCT_ARA_ADR + props.LCT_ARA_DTL_ADR.split('(')[0].trim()
-    }
-  }
-  const { data, error, isLoading } = useCoordinateByAddress(address)
-
-  if (error || isLoading || !data) {
-    return null
-  }
-
-  const 단지이름 = props.BZDT_NM ? props.BZDT_NM : props.LCC_NT_NM
-  const name = convertName(props.houseType)
-
-  // if (단지이름 === '파주운정3(07,택1) A23') {
-  //   data.latitude = 37.7136754
-  //   data.longitude = 126.754735
-  // }
-
-  return (
-    <Marker coordinate={data} onPress={() => props.onSelectMarker()}>
-      <View className='max-w-[100] shadow-md rounded-md'>
-        <View className='bg-[#7828C8] w-full flex-col rounded-md'>
-          <View className='flex-row items-center justify-center'>
-            <View className='bg-neutral-100 rounded-full px-1'>
-              <Text className='text-cyan-500 font-bold text-xs'>LH</Text>
-            </View>
-            <Text className='text-yellow-50 text-center p-1'>{name}</Text>
-          </View>
-          <Text className='p-1 text-center text-ellipsis bg-white text-slate-600'>
-            {단지이름}
-          </Text>
-        </View>
-      </View>
-    </Marker>
   )
 })
 
-function invalidType(SPL_INF_TP_CD: string) {
-  switch (SPL_INF_TP_CD) {
-    case '050': // 분양주택
-    case '051': // 분양주택-전환
-    case '060': // 공공임대
-    case '061': // 임대주택
-    case '131': // 청년매입임대
-    case '132': // 신혼부부매입임대
-    case '133': // 집주인리모델링
-    case '135': // 다가구매입임대
-    case '136': // 장기미임대
-    case '390': // 신혼희망타운
-    case '1315': // 청년매입임대수시
-    case '1325': // 신혼부부매입임대수시
-      return false
-    default:
-      return true
-  }
-}
+const titleColor = {
+  행복주택: '#7828C8',
+  공공임대: '#2A7E3B',
+  영구임대: '#CC4E00',
+  분양주택: '#D13415',
+  국민임대: '#0D74CE'
+} as const
 
-function convertName(SPL_INF_TP_CD: string) {
-  switch (SPL_INF_TP_CD) {
-    case '050':
-      return '분양주택'
-    case '051':
-      return '분양주택(전환)'
-    case '060':
-      return '공공임대'
-    case '061':
-      return '임대주택'
-    case '131':
-      return '청년매입임대'
-    case '132':
-      return '신혼부부매입임대'
-    case '135':
-      return '다가구매입임대'
-    case '136':
-      return '장기미임대'
-    case '1315':
-      return '청년매입임대수시'
-    case '1325':
-      return '신혼부부매입임대수시'
-    case '390':
-      return '신혼희망타운'
-    default:
-      return SPL_INF_TP_CD
+type Color = keyof typeof titleColor
+
+const MarkerComponent = React.memo(
+  (
+    props: DsSbdModel & {
+      pan_id: string
+      houseType: string
+      houseTypeName: string
+      index: number
+    }
+  ) => {
+    const { pan_id, houseType, houseTypeName, index, ...rest } = props
+
+    const handleSelectHouse = useSelectHouse((state) => state.handleSelectHouse)
+
+    const filteredAddress = useMemo(() => {
+      let address = ''
+      if (
+        houseType === '051' ||
+        houseType === '061' ||
+        houseType === '062' ||
+        houseType === '063'
+      ) {
+        address = rest.LGDN_ADR! + rest.LGDN_DTL_ADR
+      } else if (houseType === '050' || houseType === '390') {
+        address = rest.LCT_ARA_ADR + rest.LCT_ARA_DTL_ADR
+      }
+      return address
+    }, [rest])
+
+    const { data, error, isLoading } = useCoordinateByAddress(filteredAddress, index)
+
+    if (error || isLoading || !data) {
+      return null
+    }
+
+    const color = titleColor[houseTypeName as Color]
+
+    return (
+      <Marker
+        coordinate={{
+          latitude: data.latitude + Number(`0.00${index}`),
+          longitude: data.longitude + Number(`0.00${index}`)
+        }}
+        onPress={() => handleSelectHouse(pan_id)}
+      >
+        <View className='max-w-[100] rounded-md shadow-md'>
+          <View className={`w-full flex-col rounded-md bg-[${color}]`}>
+            <View className='flex-row items-center justify-center'>
+              <View className='rounded-full bg-neutral-100 px-1'>
+                <Text className='text-xs font-bold text-cyan-500'>LH</Text>
+              </View>
+              <Text className='p-1 text-center text-yellow-50'>
+                {houseTypeName ?? ''}
+              </Text>
+            </View>
+            <Text className='text-ellipsis bg-white p-1 text-center text-slate-600'>
+              {rest?.LCC_NT_NM ?? ''}
+            </Text>
+          </View>
+        </View>
+      </Marker>
+    )
   }
-}
+)

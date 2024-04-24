@@ -157,3 +157,25 @@ export function getMapInfoByProvince(province: string): LatLng & { ratio: number
       }
   }
 }
+
+export function isHouseType(SPL_INF_TP_CD: string) {
+  switch (SPL_INF_TP_CD) {
+    case '050': // 분양주택
+    case '051': // 분양주택-전환
+    case '060': // 공공임대
+    case '061': // 임대주택
+    case '062': // 영구임대
+    case '063': // 행복주택
+    case '131': // 청년매입임대
+    case '132': // 신혼부부매입임대
+    case '133': // 집주인리모델링
+    case '135': // 다가구매입임대
+    case '136': // 장기미임대
+    case '390': // 신혼희망타운
+    case '1315': // 청년매입임대수시
+    case '1325': // 신혼부부매입임대수시
+      return true
+    default:
+      return false
+  }
+}

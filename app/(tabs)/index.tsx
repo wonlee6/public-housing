@@ -3,16 +3,16 @@ import { ActivityIndicator, StyleSheet } from 'react-native'
 import MapView, { MapPressEvent } from 'react-native-maps'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
 
-import { convertCityName } from '@/lib/utils'
+import { convertCityName, isHouseType } from '@/lib/utils'
 import { initRegionLocation } from '@/data/inital-region'
 import useRegion from '@/store/useRegion'
 import InitMarker from '@/components/map/InitMarker'
-import usePublicHousingNotice from '@/hooks/usePublicHousingNoti'
+import usePublicHousingNotice from '@/hooks/useLHPublicHousing'
 import useSelectHouse from '@/store/useSelectHouse'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { Text, View } from '@/components/Themed'
 import { ExternalLink } from '@/components/ExternalLink'
-import DetailM from '@/components/map/DetailM'
+import DetailM from '@/components/map/DetailMarker'
 
 type ConvertCount = {
   count: number
@@ -32,7 +32,7 @@ export default function TabOneScreen() {
 
   const filteredPublicHousingData = useMemo(() => {
     if (data && data[1]?.dsList && data[1]?.dsList?.length > 0) {
-      const filterData = data[1].dsList.filter((i) => invalidType(i.SPL_INF_TP_CD))
+      const filterData = data[1].dsList.filter((i) => isHouseType(i.SPL_INF_TP_CD))
       const convertHomeData = filterData.reduce((acc: ConvertCount[], cur) => {
         const curCity = convertCityName(cur.CNP_CD_NM)
         const findItem = acc.find((v) => v.city === curCity)
@@ -77,7 +77,7 @@ export default function TabOneScreen() {
 
   const filteredHouseData = useMemo(() => {
     if (!data) return []
-    return data[1].dsList?.filter((i) => invalidType(i.SPL_INF_TP_CD)) ?? []
+    return data[1].dsList?.filter((i) => isHouseType(i.SPL_INF_TP_CD)) ?? []
   }, [data])
 
   const filteredSelectedHouse = useMemo(() => {
@@ -131,7 +131,7 @@ export default function TabOneScreen() {
                 <View className='flex-row items-center justify-center bg-transparent pt-1'>
                   <MaterialCommunityIcons
                     name='home-import-outline'
-                    style={{ fontSize: 20, color: 'white' }}
+                    style={{ fontSize: 18, color: 'white' }}
                   />
                   <Text className='ml-1 font-bold text-white '>모집 공고문 보러가기</Text>
                 </View>
@@ -152,25 +152,3 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject
   }
 })
-
-function invalidType(SPL_INF_TP_CD: string) {
-  switch (SPL_INF_TP_CD) {
-    case '050': // 분양주택
-    case '051': // 분양주택-전환
-    case '060': // 공공임대
-    case '061': // 임대주택
-    case '062': // 영구임대
-    case '063': // 행복주택
-    case '131': // 청년매입임대
-    case '132': // 신혼부부매입임대
-    case '133': // 집주인리모델링
-    case '135': // 다가구매입임대
-    case '136': // 장기미임대
-    case '390': // 신혼희망타운
-    case '1315': // 청년매입임대수시
-    case '1325': // 신혼부부매입임대수시
-      return true
-    default:
-      return false
-  }
-}

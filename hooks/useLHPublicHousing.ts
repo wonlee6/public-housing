@@ -1,7 +1,7 @@
 import { fetchNoticeInfo } from '@/service/public_house'
 import { useQuery } from '@tanstack/react-query'
 
-const usePublicHousingNotice = () => {
+const useLHPublicHousing = () => {
   return useQuery({
     queryKey: ['lhLeaseNoticeInfo1'],
     queryFn: fetchNoticeInfo
@@ -13,4 +13,4 @@ const usePublicHousingNotice = () => {
   })
 }
 
-export default usePublicHousingNotice
+export default useLHPublicHousing

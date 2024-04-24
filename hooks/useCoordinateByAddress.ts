@@ -1,9 +1,9 @@
 import { getCoordinateByAddress } from '@/service/public_house'
 import { useQuery } from '@tanstack/react-query'
 
-const useCoordinateByAddress = (address: string, id: string) => {
+const useCoordinateByAddress = (address: string, index: number) => {
   return useQuery({
-    queryKey: [id],
+    queryKey: [address, index],
     queryFn: () => {
       if (!address) return
       return getCoordinateByAddress(address)

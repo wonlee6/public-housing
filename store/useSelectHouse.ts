@@ -1,19 +1,18 @@
-import { PublicHousing } from '@/model/public-housing'
 import { create } from 'zustand'
 
 type State = {
-  selectedHouse: PublicHousing | null
+  selectedHouse: string | null
 }
 
 type Action = {
-  handleSelectHouse: (house: PublicHousing | null) => void
+  handleSelectHouse: (PAN_ID: string) => void
   handleClearHouse: () => void
 }
 
 const useSelectHouse = create<State & Action>()((set) => ({
   selectedHouse: null,
-  handleSelectHouse: (house) => set({ selectedHouse: house }),
-  handleClearHouse: () => set({selectedHouse: null})
+  handleSelectHouse: (PAN_ID) => set({ selectedHouse: PAN_ID }),
+  handleClearHouse: () => set({ selectedHouse: null })
 }))
 
 export default useSelectHouse

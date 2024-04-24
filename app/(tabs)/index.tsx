@@ -77,16 +77,21 @@ export default function TabOneScreen() {
 
   const filteredHouseData = useMemo(() => {
     if (!data) return []
-
     return data[1].dsList?.filter((i) => invalidType(i.SPL_INF_TP_CD)) ?? []
   }, [data])
+
+  const filteredSelectedHouse = useMemo(() => {
+    if (!selectedHouse || !data) return null
+
+    return data[1].dsList?.find((i) => i.PAN_ID === selectedHouse)
+  }, [selectedHouse, data])
 
   if (error) {
     return null
   }
 
   return (
-    <SafeAreaView className='flex-1 relative'>
+    <SafeAreaView className='relative flex-1'>
       {isLoading ? <ActivityIndicator size={'large'} /> : null}
       <MapView
         provider='google'
@@ -105,37 +110,35 @@ export default function TabOneScreen() {
           <DetailM publicHousingData={filteredHouseData} />
         )}
       </MapView>
-      {selectedHouse ? (
-        <View className='h-[70px] w-full p-1 flex-row items-center justify-center backdrop-blur-md bg-white/60 absolute bottom-0'>
-          <View className='w-1/3 p-1 flex-row justify-center items-center bg-transparent border-r border-r-slate-400 '>
-            <View className='bg-neutral-100 rounded-full p-1'>
-              <Text className='text-cyan-500 font-bold'>LH</Text>
+      {filteredSelectedHouse ? (
+        <View className='absolute bottom-0 h-[70px] w-full flex-row items-center justify-center bg-white/60 p-1 backdrop-blur-md'>
+          <View className='w-1/3 flex-row items-center justify-center border-r border-r-slate-400 bg-transparent p-1 '>
+            <View className='rounded-full bg-neutral-100 p-1'>
+              <Text className='font-bold text-cyan-500'>LH</Text>
             </View>
-            <View className='ml-1 bg-[#7828C8] rounded-lg py-1 px-2'>
-              <Text className='text-white font-semibold'>
-                {selectedHouse ? selectedHouse.AIS_TP_CD_NM : ''}
+            <View className='ml-1 rounded-lg bg-[#7828C8] px-2 py-1'>
+              <Text className='font-semibold text-white'>
+                {filteredSelectedHouse.AIS_TP_CD_NM}
               </Text>
             </View>
           </View>
-          <View className='w-2/3 p-1 flex-col items-center justify-center bg-transparent'>
-            <View className='px-3 py-1 items-center justify-center bg-primary rounded-lg shadow-lg'>
+          <View className='w-2/3 flex-col items-center justify-center bg-transparent p-1'>
+            <View className='items-center justify-center rounded-lg bg-primary px-3 py-1 shadow-lg'>
               <ExternalLink
-                disabled={!selectedHouse}
-                href={selectedHouse ? selectedHouse.DTL_URL : ''}
+                disabled={!filteredSelectedHouse}
+                href={filteredSelectedHouse.DTL_URL}
               >
-                <View className='pt-1 flex-row items-center justify-center bg-transparent'>
+                <View className='flex-row items-center justify-center bg-transparent pt-1'>
                   <MaterialCommunityIcons
                     name='home-import-outline'
                     style={{ fontSize: 20, color: 'white' }}
                   />
-                  <Text className='ml-1 text-white font-bold '>모집 공고문 보러가기</Text>
+                  <Text className='ml-1 font-bold text-white '>모집 공고문 보러가기</Text>
                 </View>
               </ExternalLink>
             </View>
-            <View className='bg-transparent mt-1'>
-              <Text>{`기간 : ${selectedHouse ? selectedHouse.PAN_NT_ST_DT : ''} ~ ${
-                selectedHouse ? selectedHouse.CLSG_DT : ''
-              }`}</Text>
+            <View className='mt-1 bg-transparent'>
+              <Text>{`기간 : ${filteredSelectedHouse.PAN_NT_ST_DT} ~ ${filteredSelectedHouse.CLSG_DT}`}</Text>
             </View>
           </View>
         </View>
@@ -157,6 +160,7 @@ function invalidType(SPL_INF_TP_CD: string) {
     case '060': // 공공임대
     case '061': // 임대주택
     case '062': // 영구임대
+    case '063': // 행복주택
     case '131': // 청년매입임대
     case '132': // 신혼부부매입임대
     case '133': // 집주인리모델링

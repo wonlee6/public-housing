@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useId, useState } from 'react'
 import { FlatList, Platform, Text, TouchableOpacity, View } from 'react-native'
 import * as WebBrowser from 'expo-web-browser'
 import { FontAwesome6 } from '@expo/vector-icons'
@@ -20,7 +20,8 @@ const titleColor = {
   공공임대: '#2A7E3B',
   영구임대: '#CC4E00',
   분양주택: '#D13415',
-  국민임대: '#0D74CE'
+  국민임대: '#0D74CE',
+  매입임대: '#585958'
 } as const
 type Color = keyof typeof titleColor
 
@@ -70,7 +71,10 @@ const NoticeList = React.memo((props: NoticeListModel) => {
 
   const [state, setState] = useState(false)
 
+  const id = useId()
+
   const lastLength = children?.length
+
   return (
     <Card className='mb-2 border-gray-100 bg-white'>
       <CardHeader className='flex-row items-center justify-between'>
@@ -90,7 +94,7 @@ const NoticeList = React.memo((props: NoticeListModel) => {
               isLast={lastLength === itemData.index + 1 ? true : false}
             />
           )}
-          keyExtractor={(item, index) => `${item.PAN_ID}-${index}`}
+          keyExtractor={(item) => `${item.PAN_ID}-${id}`}
         />
       </View>
     </Card>

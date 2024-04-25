@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react'
+import React, { useId, useMemo } from 'react'
 import { Text, View } from 'react-native'
 import { Marker } from 'react-native-maps'
 
@@ -14,61 +14,63 @@ type DetailMarker = {
 }
 
 export default function DetailMarker({ publicHousingData, isRatio }: DetailMarker) {
+  const id = useId()
   return (
     <>
-      {publicHousingData.map((item, index) => (
-        <MarkerContainer key={item.PAN_ID} {...item} isRatio={isRatio} idx={index} />
+      {publicHousingData.map((item) => (
+        <MarkerContainer key={id + item.PAN_ID} {...item} isRatio={isRatio} />
       ))}
     </>
   )
 }
 
-const MarkerContainer = React.memo(
-  (props: PublicHousing & { isRatio: boolean; idx: number }) => {
-    const { isRatio, idx, ...rest } = props
-    const { data, error } = useLHPublicHousingDetail(rest)
+const MarkerContainer = React.memo((props: PublicHousing & { isRatio: boolean }) => {
+  const { isRatio, ...rest } = props
+  const { data, error } = useLHPublicHousingDetail(rest)
 
-    const houseType = rest.SPL_INF_TP_CD
-    const isInvalidType = isHouseType(houseType)
+  const id = useId()
 
-    const filteredHouseData = useMemo(() => {
-      if (data && data[1] && data[1].dsSbd) {
-        return {
-          ...rest,
-          dsSbd: data[1].dsSbd
-        }
+  const houseType = rest.SPL_INF_TP_CD
+  const isInvalidType = isHouseType(houseType)
+
+  const filteredHouseData = useMemo(() => {
+    if (data && data[1] && data[1].dsSbd) {
+      return {
+        ...rest,
+        dsSbd: data[1].dsSbd
       }
-      return undefined
-    }, [data])
-
-    if (error || !isInvalidType) {
-      return null
     }
+    return undefined
+  }, [data])
 
-    return (
-      <>
-        {filteredHouseData?.dsSbd?.map((item, index) => (
-          <MarkerComponent
-            key={index}
-            {...item}
-            pan_id={props.PAN_ID}
-            houseType={houseType}
-            index={idx}
-            houseTypeName={props.AIS_TP_CD_NM}
-            isRatio={isRatio}
-          />
-        ))}
-      </>
-    )
+  if (error || !isInvalidType) {
+    return null
   }
-)
+
+  return (
+    <>
+      {filteredHouseData?.dsSbd?.map((item, index) => (
+        <MarkerComponent
+          key={`${id}-${index}`}
+          {...item}
+          index={index}
+          pan_id={props.PAN_ID}
+          houseType={houseType}
+          houseTypeName={props.AIS_TP_CD_NM}
+          isRatio={isRatio}
+        />
+      ))}
+    </>
+  )
+})
 
 const titleColor = {
   행복주택: '#7828C8',
   공공임대: '#2A7E3B',
   영구임대: '#CC4E00',
   분양주택: '#D13415',
-  국민임대: '#0D74CE'
+  국민임대: '#0D74CE',
+  매입임대: '#585958'
 } as const
 
 type Color = keyof typeof titleColor
@@ -79,14 +81,23 @@ const MarkerComponent = React.memo(
       pan_id: string
       houseType: string
       houseTypeName: string
-      index: number
       isRatio: boolean
+      index: number
     }
   ) => {
-    const { pan_id, houseType, houseTypeName, index, isRatio, ...rest } = props
+    const { pan_id, houseType, index, houseTypeName, isRatio, ...rest } = props
 
     const handleSelectHouse = useSelectHouse((state) => state.handleSelectHouse)
+    const id = useId()
 
+    // case '131': // 청년매입임대
+    // case '132': // 신혼부부매입임대
+    // case '133': // 집주인리모델링
+    // case '135': // 다가구매입임대
+    // case '136': // 장기미임대
+    // case '390': // 신혼희망타운
+    // case '1315': // 청년매입임대수시
+    // case '1325': // 신혼부부매입임대수시
     const filteredAddress = useMemo(() => {
       let address = ''
       if (
@@ -96,13 +107,13 @@ const MarkerComponent = React.memo(
         houseType === '063'
       ) {
         address = rest.LGDN_ADR! + rest.LGDN_DTL_ADR
-      } else if (houseType === '050' || houseType === '390') {
+      } else if (houseType === '050' || houseType === '390' || houseType === '060') {
         address = rest.LCT_ARA_ADR + rest.LCT_ARA_DTL_ADR
       }
       return address
-    }, [rest])
+    }, [rest, houseType])
 
-    const { data, error, isLoading } = useCoordinateByAddress(filteredAddress, index)
+    const { data, error, isLoading } = useCoordinateByAddress(filteredAddress, id)
 
     if (error || isLoading || !data) {
       return null

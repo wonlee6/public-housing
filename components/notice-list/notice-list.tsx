@@ -2,6 +2,7 @@ import React, { useId, useState } from 'react'
 import { FlatList, Platform, Text, TouchableOpacity, View } from 'react-native'
 import * as WebBrowser from 'expo-web-browser'
 import { FontAwesome6 } from '@expo/vector-icons'
+import { Entypo } from '@expo/vector-icons'
 
 import { NoticeListModel } from '@/store/useLHPublicHouse'
 import {
@@ -19,7 +20,7 @@ const titleColor = {
   행복주택: '#7828C8',
   공공임대: '#2A7E3B',
   영구임대: '#CC4E00',
-  분양주택: '#D13415',
+  분양주택: '#CA244D',
   국민임대: '#0D74CE',
   매입임대: '#585958'
 } as const
@@ -30,14 +31,17 @@ const NoticeListItem = React.memo((props: PublicHousing & { isLast: boolean }) =
   const color = titleColor[AIS_TP_CD_NM as Color]
 
   return (
-    <View className={`${isLast ? '' : 'mb-3'}`}>
+    <View className={`px-4 ${isLast ? '' : 'mb-3'}`}>
       <CardContent className='flex-col'>
         <View className='flex-row items-center justify-between'>
           <View className='flex-row items-center justify-between'>
             <View className='rounded-full bg-neutral-100 p-1'>
               <Text className='font-bold text-cyan-500'>LH</Text>
             </View>
-            <View className={`ml-2 rounded-full bg-[${color}] px-2 py-1`}>
+            <View
+              className={`ml-2 rounded-full px-2 py-1`}
+              style={{ backgroundColor: color }}
+            >
               <Text className='font-bold text-white'>{AIS_TP_CD_NM}</Text>
             </View>
           </View>
@@ -78,10 +82,17 @@ const NoticeList = React.memo((props: NoticeListModel) => {
   return (
     <Card className='mb-2 border-gray-100 bg-white'>
       <CardHeader className='flex-row items-center justify-between'>
-        <CardTitle>{`${name} - ${count}`}</CardTitle>
+        <CardTitle>
+          <Text>{name} </Text>
+          <Text className='text-lg text-black'>({count})</Text>
+        </CardTitle>
         <TouchableOpacity onPress={() => setState(!state)}>
           <View className='rounded-full bg-slate-100 p-2'>
-            <FontAwesome6 name='add' size={24} color='black' />
+            {state ? (
+              <Entypo name='minus' size={24} color='black' />
+            ) : (
+              <FontAwesome6 name='add' size={24} color='black' />
+            )}
           </View>
         </TouchableOpacity>
       </CardHeader>

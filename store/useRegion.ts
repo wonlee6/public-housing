@@ -9,6 +9,7 @@ type State = {
 type Action = {
   handleRegion: (region: Region) => void
   handleMapRatio: (provinceInfo: LatLng & { ratio: number }) => void
+  handleSelectMarker: (latLng: LatLng) => void
 }
 
 const { width, height } = Dimensions.get('window')
@@ -30,7 +31,16 @@ const useRegion = create<State & Action>()((set) => ({
         latitudeDelta: provinceInfo.ratio,
         longitudeDelta: provinceInfo.ratio
       }
-    }))
+    })),
+    handleSelectMarker: (latLng) => 
+      set((state) => ({
+        region: {
+          latitude: latLng.latitude,
+          longitude: latLng.longitude, 
+          latitudeDelta: state.region.latitudeDelta, 
+          longitudeDelta: state.region.longitudeDelta
+        }
+      }))
 }))
 
 export default useRegion

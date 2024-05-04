@@ -7,6 +7,7 @@ import useLHPublicHousingDetail from '@/hooks/useLHPublicHousingDetail'
 import useSelectHouse from '@/store/useSelectHouse'
 import useCoordinateByAddress from '@/hooks/useCoordinateByAddress'
 import { isHouseType } from '@/lib/utils'
+import useRegion from '@/store/useRegion'
 
 type DetailMarker = {
   publicHousingData: PublicHousing[]
@@ -88,6 +89,7 @@ const MarkerComponent = React.memo(
     const { pan_id, houseType, index, houseTypeName, isRatio, ...rest } = props
 
     const handleSelectHouse = useSelectHouse((state) => state.handleSelectHouse)
+    const handleSelectMarker = useRegion((state) => state.handleSelectMarker)
     const id = useId()
 
     // case '131': // 청년매입임대
@@ -121,15 +123,21 @@ const MarkerComponent = React.memo(
 
     const color = titleColor[houseTypeName as Color]
 
+    const lat = data.latitude + Number(`0.000${index + randomNum()}`)
+    const lng = data.longitude + Number(`0.000${index + randomNum()}`)
+
     return (
       <>
         {isRatio ? (
           <Marker
             coordinate={{
-              latitude: data.latitude + Number(`0.000${index + randomNum()}`),
-              longitude: data.longitude + Number(`0.000${index + randomNum()}`)
+              latitude: lat,
+              longitude: lng
             }}
-            onPress={() => handleSelectHouse(pan_id)}
+            onPress={() => {
+              handleSelectHouse(pan_id)
+              handleSelectMarker({ latitude: lat, longitude: lng })
+            }}
           >
             <View className='max-w-[100] rounded-md'>
               <View
@@ -145,7 +153,7 @@ const MarkerComponent = React.memo(
                   </Text>
                 </View>
                 <Text className='text-ellipsis bg-white p-1 text-center text-slate-600'>
-                  {rest?.LCC_NT_NM ?? ''}
+                  {rest?.LCC_NT_NM ?? rest?.BZDT_NM ?? ''}
                 </Text>
               </View>
             </View>

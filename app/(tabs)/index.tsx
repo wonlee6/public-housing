@@ -23,6 +23,17 @@ type ConvertRegion = {
   lng?: number
 }
 
+const titleColor = {
+  행복주택: '#7828C8',
+  공공임대: '#2A7E3B',
+  영구임대: '#CC4E00',
+  분양주택: '#CA244D',
+  국민임대: '#0D74CE',
+  매입임대: '#585958'
+} as const
+
+type Color = keyof typeof titleColor
+
 export default function TabOneScreen() {
   const { data, error, isLoading } = usePublicHousingNotice()
 
@@ -67,7 +78,7 @@ export default function TabOneScreen() {
   }, [data])
 
   useEffect(() => {
-    if (region.latitudeDelta < 2) {
+    if (region.longitudeDelta < 2) {
       setIsRatio(true)
       return
     }
@@ -104,6 +115,8 @@ export default function TabOneScreen() {
     return null
   }
 
+  const color = titleColor[filteredSelectedHouse?.AIS_TP_CD_NM as Color]
+
   return (
     <SafeAreaView className='relative flex-1'>
       {isLoading ? <ActivityIndicator size={'large'} /> : null}
@@ -127,7 +140,10 @@ export default function TabOneScreen() {
             <View className='rounded-full bg-neutral-100 p-1'>
               <Text className='font-bold text-cyan-500'>LH</Text>
             </View>
-            <View className='ml-1 rounded-lg bg-[#7828C8] px-2 py-1'>
+            <View
+              className={`ml-1 rounded-lg px-2 py-1`}
+              style={{ backgroundColor: color ?? '#fff' }}
+            >
               <Text className='font-semibold text-white'>
                 {filteredSelectedHouse.AIS_TP_CD_NM}
               </Text>

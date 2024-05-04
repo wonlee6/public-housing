@@ -1,7 +1,6 @@
 import React, { useId, useState } from 'react'
 import { FlatList, Platform, Text, TouchableOpacity, View } from 'react-native'
 import * as WebBrowser from 'expo-web-browser'
-import { FontAwesome6 } from '@expo/vector-icons'
 import { Entypo } from '@expo/vector-icons'
 
 import { NoticeListModel } from '@/store/useLHPublicHouse'
@@ -89,9 +88,9 @@ const NoticeList = React.memo((props: NoticeListModel) => {
         <TouchableOpacity onPress={() => setState(!state)}>
           <View className='rounded-full bg-slate-100 p-2'>
             {state ? (
-              <Entypo name='minus' size={24} color='black' />
+              <Entypo name='chevron-small-down' size={24} color='black' />
             ) : (
-              <FontAwesome6 name='add' size={24} color='black' />
+              <Entypo name='chevron-small-left' size={24} color='black' />
             )}
           </View>
         </TouchableOpacity>
